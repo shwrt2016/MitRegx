@@ -157,7 +157,7 @@
 
 #pragma action: 验证码 格式
 - (MitRegexStateType)regexCodeNumber:(NSString*)str{
-    NSString * regex = @"^[0-9]{4}$";
+    NSString * regex = @"^[0-9]{6}$";
     NSPredicate * pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",regex];
     BOOL isMatch = [pred evaluateWithObject:str];
     isMatch? [self changeStatusString:MitRegexStateTypeCodeRight]:[self changeStatusString:MitRegexStateTypeCodeError];
