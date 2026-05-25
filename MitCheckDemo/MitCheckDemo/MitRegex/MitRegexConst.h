@@ -12,7 +12,7 @@
  MitRegexStateTypeChatError,     //编码格式错误
  */
 
-/** 手机信息错误提示文本 */
+/** 手机信息错误提示文本 (MoreError/LessError 为 format 文本，由 phoneLength 拼接位数) */
 UIKIT_EXTERN NSString * const MitRegexPhoneRightTxt;
 UIKIT_EXTERN NSString * const MitRegexPhoneMoreErrorTxt;
 UIKIT_EXTERN NSString * const MitRegexPhoneLessErrorTxt;
@@ -24,7 +24,7 @@ UIKIT_EXTERN NSString * const MitRegexPsdMoreErrorTxt;
 UIKIT_EXTERN NSString * const MitRegexPsdLessErrorTxt;
 UIKIT_EXTERN NSString * const MitRegexPsdChatErrorTxt;
 
-/** 验证码错误提示文本 */
+/** 验证码错误提示文本 (CodeErrorTxt 为 format 文本，由 codeLength 拼接位数) */
 UIKIT_EXTERN NSString * const MitRegexCodeRightTxt;
 UIKIT_EXTERN NSString * const MitRegexCodeErrorTxt;
 UIKIT_EXTERN NSString * const MitRegexCodeChatErrorTxt;

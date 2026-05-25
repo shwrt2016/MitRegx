@@ -14,6 +14,8 @@
 - (instancetype)init{
     if (self = [super init]) {
         _passed = YES;
+        _phoneLength = 11;
+        _codeLength = 6;
     }
     return self;
 }
@@ -29,6 +31,24 @@
             if (_status == MitRegexStateTypePhoneRight ) {
                 _passed =YES;
             }else{
+                _passed = NO;
+            }
+        }
+        return self;
+    };
+}
+
+#pragma mark 校验手机号 格式 (自定义位数)
+- (MitRegexMaker *(^)(NSString *, NSUInteger))validatePhoneWithLength{
+    return ^(NSString *str, NSUInteger length){
+        if (length > 0) {
+            _phoneLength = length;
+        }
+        if (_passed) {
+            _status = [self regexPhoneNumber:str];
+            if (_status == MitRegexStateTypePhoneRight) {
+                _passed = YES;
+            } else {
                 _passed = NO;
             }
         }
@@ -58,6 +78,24 @@
             if (_status == MitRegexStateTypeCodeRight ) {
                 _passed =YES;
             }else{
+                _passed = NO;
+            }
+        }
+        return self;
+    };
+}
+
+#pragma mark 校验验证码 格式 (自定义位数)
+- (MitRegexMaker *(^)(NSString *, NSUInteger))validateCodeNumberWithLength{
+    return ^(NSString *str, NSUInteger length){
+        if (length > 0) {
+            _codeLength = length;
+        }
+        if (_passed) {
+            _status = [self regexCodeNumber:str];
+            if (_status == MitRegexStateTypeCodeRight) {
+                _passed = YES;
+            } else {
                 _passed = NO;
             }
         }
@@ -117,20 +155,20 @@
 
 #pragma action: 手机号 格式
 - (MitRegexStateType)regexPhoneNumber:(NSString*)phoneNum{
-    //由于小灵通的概率太小，也由于随时有可能出现新号，这里对手机号的校验只做是否是11位，具体格式是否符合最好扔给后台做校验。
-//    NSString * regex = @"^[1][3758][0-9]{9}$";
-    NSString * regex = @"^[0-9]{11}$";
+    //由于小灵通的概率太小，也由于随时有可能出现新号，这里对手机号的校验只做位数校验，具体格式是否符合最好扔给后台做校验。
+    NSUInteger expectedLength = _phoneLength > 0 ? _phoneLength : 11;
+    NSString * regex = [NSString stringWithFormat:@"^[0-9]{%lu}$", (unsigned long)expectedLength];
     NSPredicate * pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",regex];
     BOOL isMatch = [pred evaluateWithObject:phoneNum];
     if(isMatch){
         [self changeStatusString:MitRegexStateTypePhoneRight];
         return MitRegexStateTypePhoneRight;
     }
-    NSInteger length = phoneNum.length ;
-    if(length < 11){
+    NSUInteger length = phoneNum.length;
+    if(length < expectedLength){
         [self changeStatusString:MitRegexStateTypePhoneLessError];
         return MitRegexStateTypePhoneLessError;
-    }else if(length > 11){
+    }else if(length > expectedLength){
         [self changeStatusString:MitRegexStateTypePhoneMoreError];
         return MitRegexStateTypePhoneMoreError;
     }
@@ -157,11 +195,16 @@
 
 #pragma action: 验证码 格式
 - (MitRegexStateType)regexCodeNumber:(NSString*)str{
-    NSString * regex = @"^[0-9]{6}$";
+    NSUInteger expectedLength = _codeLength > 0 ? _codeLength : 6;
+    NSString * regex = [NSString stringWithFormat:@"^[0-9]{%lu}$", (unsigned long)expectedLength];
     NSPredicate * pred = [NSPredicate predicateWithFormat:@"SELF MATCHES %@",regex];
     BOOL isMatch = [pred evaluateWithObject:str];
-    isMatch? [self changeStatusString:MitRegexStateTypeCodeRight]:[self changeStatusString:MitRegexStateTypeCodeError];
-    return isMatch? MitRegexStateTypeCodeRight:MitRegexStateTypeCodeChatError;
+    if (isMatch) {
+        [self changeStatusString:MitRegexStateTypeCodeRight];
+        return MitRegexStateTypeCodeRight;
+    }
+    [self changeStatusString:MitRegexStateTypeCodeError];
+    return MitRegexStateTypeCodeError;
 }
 
 
@@ -296,10 +339,10 @@
             self.statusString = MitRegexPhoneRightTxt;
             break;
         case MitRegexStateTypePhoneLessError:
-            self.statusString = MitRegexPhoneLessErrorTxt;
+            self.statusString = [NSString stringWithFormat:MitRegexPhoneLessErrorTxt, (unsigned long)(_phoneLength > 0 ? _phoneLength : 11)];
             break;
         case MitRegexStateTypePhoneMoreError:
-            self.statusString = MitRegexPhoneMoreErrorTxt;
+            self.statusString = [NSString stringWithFormat:MitRegexPhoneMoreErrorTxt, (unsigned long)(_phoneLength > 0 ? _phoneLength : 11)];
             break;
         case MitRegexStateTypePsdRight:
             self.statusString = MitRegexPsdRightTxt;
@@ -311,7 +354,7 @@
             self.statusString = MitRegexPsdMoreErrorTxt;
             break;
         case MitRegexStateTypeCodeError:
-            self.statusString = MitRegexCodeErrorTxt;
+            self.statusString = [NSString stringWithFormat:MitRegexCodeErrorTxt, (unsigned long)(_codeLength > 0 ? _codeLength : 6)];
             break;
         case MitRegexStateTypeCodeRight:
             self.statusString = MitRegexCodeRightTxt;
